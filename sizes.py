@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # Extract object sizes recursively from file system
 import sys
-import pickle
+import cPickle as pickle
 
 from FileSize import File,recursive_walk
 root = sys.argv[1]
