@@ -239,7 +239,7 @@ class SizeTableView(QtGui.QTreeView):
         header.setResizeMode(0, QtGui.QHeaderView.Stretch)
         header.setResizeMode(1, QtGui.QHeaderView.Fixed)
         #header.setResizeMode(1, QtGui.QHeaderView.Interactive)
-        header.resizeSection(1, 80)
+        header.resizeSection(1, 160)
         header.setMovable(False) # Don't allow moving header
 
         logger.info("Set up header")

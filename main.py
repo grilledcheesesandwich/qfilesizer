@@ -14,16 +14,17 @@ logging.basicConfig(level=logging.DEBUG,
             stream=sys.stdout)
 
 # Load data
+"""
 import pickle
 f = open("sizes.pickle", "rb")
 rv = pickle.load(f)
 f.close()
 rv.set_parents()
-
+"""
 # Qt Application
 app = QtGui.QApplication(sys.argv)
 dt = MainWindow()
-dt.data = rv
+#dt.data = rv
 dt.show()
 app.exec_()
 

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # TODO: - allow queue files for removal in interface (and remove them from the tree)
-#       - load from disk instead of pickled file
+#       - show progress bar when loading directory
 #       - allow changes to model
-#       - manipulation/refresh
+#         - manipulation/refresh
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import SIGNAL,Qt
 import logging
@@ -99,6 +99,8 @@ class TableModel(QtCore.QAbstractItemModel):
         return self._root
     def setRoot(self, root):
         self._root = root
+        self.reset()
+        self.idx_cache = {} # we must hold references to the indexes
     root = property(getRoot,setRoot)    
 
 # Tree model
@@ -165,13 +167,18 @@ class MainWindow(QtGui.QWidget):#MainWindow):
         flatview.setModel(self.model2)
         flatview.afterModel()
         tabwidget.addTab(flatview, "Flat")
+        """
+        button = QtGui.QPushButton("Reload view")
+        self.connect(button, SIGNAL("clicked()"), self.reload)
+        vlayout.addWidget(button)
+        """
+
+        button = QtGui.QPushButton("Load directory")
+        self.connect(button, SIGNAL("clicked()"), self.load)
+        vlayout.addWidget(button)
 
         button = QtGui.QPushButton("Quit")        
         self.connect(button, SIGNAL("clicked()"), self.close)
-        vlayout.addWidget(button)
-
-        button = QtGui.QPushButton("Reload")        
-        self.connect(button, SIGNAL("clicked()"), self.reload)
         vlayout.addWidget(button)
 
     def reload(self):
@@ -183,3 +190,14 @@ class MainWindow(QtGui.QWidget):#MainWindow):
             pass
         # Add the new
         self.build_layout()
+
+    def load(self):
+        dirname = QtGui.QFileDialog.getExistingDirectory (None, "Select a directory")
+        logger.info("Load directory %s", dirname)
+        dirname = str(dirname)
+        from FileSize import recursive_walk
+        rv = recursive_walk(dirname)
+        rv.set_parents()
+        self.data = rv
+        logger.info("Finished -- models updated")
+
