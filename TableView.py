@@ -48,36 +48,56 @@ class ItemDelegate(QtGui.QStyledItemDelegate):
         part = data/MAX
         # Draw bar
         (x,y,w,h) = option.rect.getRect()
-        (x,y,w,h) = x+10,y+4,w-20,h-8
+        (x,y,w,h) = x+10,y+4,w-15,h-8
+        #(x,y,w,h) = x+10,y+5,w-15,h-10
+        #y -= (magnitude-1)
+        #h += (magnitude-1)*2
+        
+        from math import ceil, log10
+        wpart = ceil(w*part)
     
         # Background of bar
-        bar_bg = QtGui.QBrush(QtGui.QColor(240,240,240))
+        #grad = GradientQT()
+        #grad.setColorAt(0.0, QtGui.QColor(255,255,255))
+        #grad.setColorAt(1.0, QtGui.QColor(128,128,128))
+        #    Background color should be color(magnitude-1) ?
+        #bar_bg_col = grad.getColorAt((magnitude-1)/4.0)
+        bar_bg_col = QtGui.QColor(240,240,240)
+        bar_bg = QtGui.QBrush(bar_bg_col)
         p.fillRect(x,y,w,h,bar_bg)
 
         # Set gradient based on magnitude
         grad = GradientQT()
-        grad.setColorAt(0.0, QtGui.QColor(220, 220, 220))
-        #grad.setColorAt(1.0, QtGui.QColor(30, 30, 255))
-        grad.setColorAt(0.5, QtGui.QColor(30, 255, 30))
-        grad.setColorAt(1.0, QtGui.QColor(30, 128, 30))
+        
+        #grad.setColorAt(0.0, QtGui.QColor(220, 220, 220))
+        #grad.setColorAt(0.5, QtGui.QColor(30, 255, 30))
+        #grad.setColorAt(1.0, QtGui.QColor(30, 192, 30))
+        grad.setColorAt(0.0, QtGui.QColor(200,200,255))
+        grad.setColorAt(1.0, QtGui.QColor(60,60,255))
+        
+
         # Color by logarithm
         import math
-        base_col = grad.getColorAt((math.log10(data)-1.0) / 10.0)
+        base_col = grad.getColorAt((log10(data)-1.0) / 10.0)
+        #base_col = grad.getColorAt((magnitude)/4.0)
         brush = QtGui.QBrush(base_col)
         p.fillRect(x,y,w*part,h, brush)
 
         # 3D ness
-        brush = QtGui.QLinearGradient(x, y, x+w, y)
-        brush.setColorAt(0.0, QtGui.QColor(0,0,0,128))
-        brush.setColorAt(0.1, QtGui.QColor(0,0,0,0))
-        brush.setColorAt(0.9, QtGui.QColor(0,0,0,0))
-        brush.setColorAt(1.0, QtGui.QColor(0,0,0,128))
-        p.fillRect(x,y,w,h, brush)
+        # - caps at both sides
+        brush = QtGui.QBrush(QtGui.QColor(0,0,0,100))
+        p.fillRect(x,y,1,h, brush)
+        p.fillRect(x+w-1,y,1,h, brush)
+        # - slight left to right gradient
+        brush = QtGui.QLinearGradient(x+1, y, x+w-1, y)  
+        brush.setColorAt(0.0, QtGui.QColor(0,0,0,0))
+        brush.setColorAt(1.0, QtGui.QColor(0,0,0,80))
+        p.fillRect(x+1,y,w-2,h, brush)
 
         brush = QtGui.QLinearGradient(x, y, x, y+h)
-        brush.setColorAt(0.0, QtGui.QColor(0,0,0,128))
+        brush.setColorAt(0.0, QtGui.QColor(0,0,0,140)) # 128
         brush.setColorAt(0.5, QtGui.QColor(0,0,0,0))
-        brush.setColorAt(1.0, QtGui.QColor(0,0,0,200))
+        brush.setColorAt(1.0, QtGui.QColor(0,0,0,220)) # 200
         p.fillRect(x,y,w,h, brush)
         
         # Boxes that signify magnitude
@@ -92,101 +112,7 @@ class ItemDelegate(QtGui.QStyledItemDelegate):
             else:
                 b = bar_bg
             p.fillRect(x+4,y+h-((xx+1)*4)-4, 5, 3, b)
-        """
-        # new old idea
-        # vertical gradient based on magnitude
-        # horizontal fill based on size within magnitude
-        # vertical "stars" before bar will signify magnitude as well
-        # or marker bar
-        # fire color scheme
-        # "fast reload view" button for quick prototyping
-        # scale/zoom/animate, so that relationships can be seen
-        # keep color scheme the same, so that it scales with the values?
-
-        #if data<1000.0:
-        #    magnitude = 1
-        #    MAX = 1000.0
-        #elif data<1000000.0:
-        #    magnitude = 2
-        #    MAX = 1000000.0
-        #else: #if data<1000000000.0:
-        #    magnitude = 3
-        #    MAX = 1000000000.0 # 1Gb
-
-        #print data, option.rect, int(option.state)
-        # Draw bar
-        # Height depend on size magnitude (gb,mb,kb,..)
-        (x,y,w,h) = option.rect.getRect()
-        (x,y,w,h) = x+5,y+4,w-10,h-8
-        #part = min(data/MAX, 1.0) / 3.0
-        #part += (magnitude-1)/3.0
-        #import math
-        #part = (math.log10(data)-1.0)/10.0
-        #part = data / 1000000000.0
-        #magnitude = 1
-        #if part > 1.0:
-        #    magnitude = 2
-        #if part > 2.0:
-        #    magnitude = 3
-        #part /= magnitude
-        #if part<0.0:
-        #    part = 0.0
-        #if part>1.0:
-        #    part = 1.0
-        blocks = 40
-        base_size = 1000
-        val1 = (data/base_size)%blocks
-        val2 = (data/(base_size*blocks))%blocks
-        val3 = (data/(base_size*blocks*blocks))
-        block_width = 5
-        block_height = 3
-        block_xsep = 6
-
-        brush = QtGui.QLinearGradient(x, y, x+w, y+h)
-        brush.setColorAt(0.0, QtGui.QColor(96.0,96.0,255.0))
-        brush.setColorAt(1.0, QtGui.QColor(96.0,96.0,255.0))
-
-        for xx in xrange(0, val1):
-            p.fillRect(x + xx*block_xsep, y, block_width, block_height, brush)
-
-        brush = QtGui.QLinearGradient(x, y, x+w, y+h)
-        brush.setColorAt(0.0, QtGui.QColor(0.0,0.0, 96.0))
-        brush.setColorAt(1.0, QtGui.QColor(0.0,0.0,96.0))
-
-        for xx in xrange(0, val2):
-            p.fillRect(x + xx*block_xsep, y+4, block_width, block_height, brush)
-
-        brush = QtGui.QLinearGradient(x, y, x+w, y+h)
-        brush.setColorAt(0.0, QtGui.QColor(0.0,0.0, 0.0))
-        brush.setColorAt(1.0, QtGui.QColor(0.0,0.0, 0.0))
-
-        for xx in xrange(0, val3):
-            p.fillRect(x + xx*block_xsep, y+8, block_width, block_height, brush)
-
-        """
-        """
-        p.setClipRect(QtCore.QRect(x, y, w*val1, h))
-        brush = QtGui.QLinearGradient(x, y, x+w, y+h)
-        brush.setColorAt(0.0, QtGui.QColor(192.0,192.0, 192.0))
-        brush.setColorAt(1.0, QtGui.QColor(96.0,96.0,255.0))
-        p.fillRect(x, y, w, 3, brush)
-
-        p.setClipRect(QtCore.QRect(x, y, w*val2, h))
-        brush = QtGui.QLinearGradient(x, y, x+w, y+h)
-        brush.setColorAt(0.0, QtGui.QColor(96.0,96.0, 96.0))
-        brush.setColorAt(1.0, QtGui.QColor(0.0,0.0,96.0))
-        p.fillRect(x, y+4, w, 3, brush)
-
-        p.setClipRect(QtCore.QRect(x, y, w*val3, h))
-        brush = QtGui.QLinearGradient(x, y, x+w, y+h)
-        brush.setColorAt(0.0, QtGui.QColor(96.0,96.0, 96.0))
-        brush.setColorAt(1.0, QtGui.QColor(255.0,0.0, 0.0))
-        p.fillRect(x, y+8, w, 3, brush)
-        """
-        
-
-        
-        
+                
         p.restore()
         # QtGui.QStyle.State_MouseOver
         # QtGui.QStyle.State_Selected
@@ -223,7 +149,6 @@ opt->state & QStyle::State_HasFocus
 drawPrimitive(QStyle::PE_FrameFocusRect, &o, p, widget);
 p->restore();
 
-
 """
 
 class SizeTableView(QtGui.QTreeView):
@@ -233,6 +158,7 @@ class SizeTableView(QtGui.QTreeView):
         self.delegate = ItemDelegate()
         self.setItemDelegateForColumn(1, self.delegate)
 
+        self.setSelectionMode(QtGui.QAbstractItemView.MultiSelection)
         self.setMinimumSize(400,300)
     def afterModel(self):
         header = self.header()
@@ -241,7 +167,7 @@ class SizeTableView(QtGui.QTreeView):
         header.setResizeMode(0, QtGui.QHeaderView.Stretch)
         header.setResizeMode(1, QtGui.QHeaderView.Fixed)
         #header.setResizeMode(1, QtGui.QHeaderView.Interactive)
-        header.resizeSection(1, 160)
+        header.resizeSection(1, 120)
         header.setMovable(False) # Don't allow moving header
 
         logger.info("Set up header")
