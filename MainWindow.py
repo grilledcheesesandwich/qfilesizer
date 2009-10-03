@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 # TODO: - allow queue files for removal in interface (and remove them from the tree)
+#         - multi selection
 #       - show progress bar when loading directory
 #       - allow changes to model
 #         - manipulation/refresh
+#       - split MainWindow file into individual classes
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import SIGNAL,Qt
 import logging
@@ -163,11 +165,10 @@ class MainWindow(QtGui.QWidget):#MainWindow):
         flatview.setModel(self.model2)
         flatview.afterModel()
         tabwidget.addTab(flatview, "Flat")
-        """
-        button = QtGui.QPushButton("Reload view")
-        self.connect(button, SIGNAL("clicked()"), self.reload)
-        vlayout.addWidget(button)
-        """
+        
+        #button = QtGui.QPushButton("Reload view")
+        #self.connect(button, SIGNAL("clicked()"), self.reload)
+        #vlayout.addWidget(button)
 
         button = QtGui.QPushButton("Load directory")
         self.connect(button, SIGNAL("clicked()"), self.load)

@@ -33,25 +33,15 @@ class ItemDelegate(QtGui.QStyledItemDelegate):
         style = QtGui.QApplication.style()
         style.drawPrimitive(QtGui.QStyle.PE_PanelItemViewItem, option, p) # ,widget
         # Process data
-        if data<10000.0: # 10kB
-            magnitude = 1
-            MAX = 10000.0 
-        elif data<1000000.0: # 1MB
-            magnitude = 2
-            MAX = 1000000.0
-        elif data<100000000.0: # 100MB
-            magnitude = 3
-            MAX = 100000000.0
-        else:  # 10GB
-            magnitude = 4
-            MAX = 10000000000.0 
-        part = data/MAX
+        MAX = 10000.0
+        magnitude = 1
+        while data > MAX:
+            magnitude += 1
+            MAX *= 20
+        part = min(data/MAX, 1.0)
         # Draw bar
         (x,y,w,h) = option.rect.getRect()
         (x,y,w,h) = x+10,y+4,w-15,h-8
-        #(x,y,w,h) = x+10,y+5,w-15,h-10
-        #y -= (magnitude-1)
-        #h += (magnitude-1)*2
         
         from math import ceil, log10
         wpart = ceil(w*part)
@@ -72,16 +62,16 @@ class ItemDelegate(QtGui.QStyledItemDelegate):
         #grad.setColorAt(0.0, QtGui.QColor(220, 220, 220))
         #grad.setColorAt(0.5, QtGui.QColor(30, 255, 30))
         #grad.setColorAt(1.0, QtGui.QColor(30, 192, 30))
-        grad.setColorAt(0.0, QtGui.QColor(200,200,255))
+
+        grad.setColorAt(0.0, QtGui.QColor(220,220,255))
         grad.setColorAt(1.0, QtGui.QColor(60,60,255))
         
-
         # Color by logarithm
         import math
         base_col = grad.getColorAt((log10(data)-1.0) / 10.0)
         #base_col = grad.getColorAt((magnitude)/4.0)
         brush = QtGui.QBrush(base_col)
-        p.fillRect(x,y,w*part,h, brush)
+        p.fillRect(x,y,wpart,h, brush)
 
         # 3D ness
         # - caps at both sides
@@ -102,16 +92,20 @@ class ItemDelegate(QtGui.QStyledItemDelegate):
         
         # Boxes that signify magnitude
         brush = QtGui.QLinearGradient(x, y, x, y+h)
-        brush.setColorAt(0.0, QtGui.QColor(255,255,0))
-        brush.setColorAt(0.5, QtGui.QColor(255,0,0))
+        brush.setColorAt(0.0, QtGui.QColor(240,240,0))
+        brush.setColorAt(0.5, QtGui.QColor(240,0,0))
         brush.setColorAt(1.0, QtGui.QColor(0,0,0))
         (x,y,w,h) = option.rect.getRect()
+        
         for xx in xrange(0, magnitude-1):
             if xx < (magnitude-1):
                 b = brush
             else:
                 b = bar_bg
-            p.fillRect(x+4,y+h-((xx+1)*4)-4, 5, 3, b)
+            bwidth = 5+(xx//2)
+            xpos = x+4-(xx//2)
+            ypos = y+h-((xx+1)*3)-3
+            p.fillRect(xpos,ypos, bwidth, 2, b)
                 
         p.restore()
         # QtGui.QStyle.State_MouseOver
