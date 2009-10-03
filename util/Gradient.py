@@ -26,6 +26,10 @@ class Gradient(object):
             insort(self.stops, pos)
         self.stop_values[pos] = color
     def get_color_at(self, pos):
+        if pos > 1.0: # clip
+            pos = 1.0
+        if pos < 0.0:
+            pos = 0.0
         lv = bisect_left(self.stops, pos)
         lv = max(lv, 1)
         lv = min(lv, len(self.stops)-1)
