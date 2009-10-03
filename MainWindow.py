@@ -113,8 +113,6 @@ class FlatTableModel(TableModel):
     def __init__(self, *args):
         apply(TableModel.__init__, (self, ) + args)
         self.lst = [] # start with empty tree
-        self._root = None
-        self.headers = ["File","Size"]
     def rowCount(self, parent):
         return len(self.lst)
     def index(self, row, column, parent):
@@ -123,14 +121,12 @@ class FlatTableModel(TableModel):
         return idx
     def parent(self, child_):
         return QtCore.QModelIndex()
-    def getRoot(self):
-        return self._root
     def setRoot(self, root):
-        self._root = root
+        TableModel.setRoot(self, root)
         self.lst = root.all_nondir_children()
         self.lst.sort(File.cmp)
         self.lst = self.lst[0:1000]
-    root = property(getRoot,setRoot)
+    root = property(TableModel.getRoot,setRoot)
 
 class MainWindow(QtGui.QWidget):#MainWindow):
     def __init__(self, *args):
