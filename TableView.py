@@ -25,6 +25,7 @@ class ItemDelegate(QtGui.QStyledItemDelegate):
     def __init__(self, *args):
         apply(QtGui.QStyledItemDelegate.__init__, (self, ) + args)
     def paint(self, p, option, index):
+        from math import log10, modf, ceil
         data = index.data(Qt.DisplayRole)
         data = data.toLongLong()[0]
         p.save()
@@ -33,17 +34,19 @@ class ItemDelegate(QtGui.QStyledItemDelegate):
         style = QtGui.QApplication.style()
         style.drawPrimitive(QtGui.QStyle.PE_PanelItemViewItem, option, p) # ,widget
         # Process data
-        MAX = 10000.0
-        magnitude = 1
-        while data > MAX:
-            magnitude += 1
-            MAX *= 20
-        part = min(data/MAX, 1.0)
+        #MAX = 10000.0
+        #magnitude = 1
+        #while data > MAX:
+        #    magnitude += 1
+        #    MAX *= 20
+        #part = min(data/MAX, 1.0)
+        logval = modf(log10(data)/3.0)
+        magnitude = int(logval[1])+1
+        part = logval[0]
+
         # Draw bar
         (x,y,w,h) = option.rect.getRect()
         (x,y,w,h) = x+10,y+4,w-15,h-8
-        
-        from math import ceil, log10
         wpart = ceil(w*part)
     
         # Background of bar
@@ -63,7 +66,7 @@ class ItemDelegate(QtGui.QStyledItemDelegate):
         #grad.setColorAt(0.5, QtGui.QColor(30, 255, 30))
         #grad.setColorAt(1.0, QtGui.QColor(30, 192, 30))
 
-        grad.setColorAt(0.0, QtGui.QColor(220,220,255))
+        grad.setColorAt(0.0, QtGui.QColor(200,200,255))
         grad.setColorAt(1.0, QtGui.QColor(60,60,255))
         
         # Color by logarithm
@@ -102,10 +105,10 @@ class ItemDelegate(QtGui.QStyledItemDelegate):
                 b = brush
             else:
                 b = bar_bg
-            bwidth = 5+(xx//2)
-            xpos = x+4-(xx//2)
-            ypos = y+h-((xx+1)*3)-3
-            p.fillRect(xpos,ypos, bwidth, 2, b)
+            bwidth = 5+xx
+            xpos = x+4-xx
+            ypos = y+h-((xx+1)*4)-4
+            p.fillRect(xpos,ypos, bwidth, 3, b)
                 
         p.restore()
         # QtGui.QStyle.State_MouseOver
