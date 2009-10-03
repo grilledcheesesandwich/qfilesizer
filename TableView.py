@@ -33,18 +33,18 @@ class ItemDelegate(QtGui.QStyledItemDelegate):
         style = QtGui.QApplication.style()
         style.drawPrimitive(QtGui.QStyle.PE_PanelItemViewItem, option, p) # ,widget
         # Process data
-        if data<1000.0:
+        if data<10000.0: # 10kB
             magnitude = 1
-            MAX = 1000.0
-        elif data<1000000.0:
+            MAX = 10000.0 
+        elif data<1000000.0: # 1MB
             magnitude = 2
             MAX = 1000000.0
-        elif data<1000000000.0:
+        elif data<100000000.0: # 100MB
             magnitude = 3
-            MAX = 1000000000.0 # 1Gb
-        else: #if data<1000000000.0:
+            MAX = 100000000.0
+        else:  # 10GB
             magnitude = 4
-            MAX = 1000000000000.0 # 1000Gb
+            MAX = 10000000000.0 
         part = data/MAX
         # Draw bar
         (x,y,w,h) = option.rect.getRect()
@@ -58,25 +58,27 @@ class ItemDelegate(QtGui.QStyledItemDelegate):
         grad = GradientQT()
         grad.setColorAt(0.0, QtGui.QColor(220, 220, 220))
         #grad.setColorAt(1.0, QtGui.QColor(30, 30, 255))
-        grad.setColorAt(1.0, QtGui.QColor(30, 255, 30))
+        grad.setColorAt(0.5, QtGui.QColor(30, 255, 30))
+        grad.setColorAt(1.0, QtGui.QColor(30, 128, 30))
         # Color by logarithm
         import math
         base_col = grad.getColorAt((math.log10(data)-1.0) / 10.0)
         brush = QtGui.QBrush(base_col)
         p.fillRect(x,y,w*part,h, brush)
 
+        # 3D ness
         brush = QtGui.QLinearGradient(x, y, x+w, y)
         brush.setColorAt(0.0, QtGui.QColor(0,0,0,128))
         brush.setColorAt(0.1, QtGui.QColor(0,0,0,0))
         brush.setColorAt(0.9, QtGui.QColor(0,0,0,0))
         brush.setColorAt(1.0, QtGui.QColor(0,0,0,128))
-        p.fillRect(x,y,w*part,h, brush)
+        p.fillRect(x,y,w,h, brush)
 
         brush = QtGui.QLinearGradient(x, y, x, y+h)
         brush.setColorAt(0.0, QtGui.QColor(0,0,0,128))
         brush.setColorAt(0.5, QtGui.QColor(0,0,0,0))
         brush.setColorAt(1.0, QtGui.QColor(0,0,0,200))
-        p.fillRect(x,y,w*part,h, brush)
+        p.fillRect(x,y,w,h, brush)
         
         # Boxes that signify magnitude
         brush = QtGui.QLinearGradient(x, y, x, y+h)
