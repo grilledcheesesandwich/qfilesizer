@@ -1,10 +1,19 @@
 # -*- coding: utf-8 -*-
 # TODO: - allow queue files for removal in interface (and remove them from the tree)
-#         - multi selection
 #       - show progress bar when loading directory
 #       - allow changes to model
 #         - manipulation/refresh
 #       - split MainWindow file into individual classes
+#       - selection should be synced between both models
+#         - handle selection in base structure, then send signals when it changed
+#  deletion:
+#       - show statistics about selected files (number of files + total size)
+#           http://doc.trolltech.com/4.4/qitemselectionmodel.html#selectedIndexes
+#           QItemSelectionModel
+#           QItemSelectionModel * QAbstractItemView::selectionModel () const
+#           signal: void selectionChanged ( const QItemSelection & selected, const QItemSelection & deselected )
+#       - allow dumping list of selected files to text file
+
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import SIGNAL,Qt
 import logging
@@ -125,7 +134,10 @@ class FlatTableModel(TableModel):
         return QtCore.QModelIndex()
     def setRoot(self, root):
         TableModel.setRoot(self, root)
-        self.lst = root.all_nondir_children()
+        if root is not None:
+            self.lst = root.all_nondir_children()
+        else:
+            self.lst = []
         self.lst.sort(File.cmp)
         self.lst = self.lst[0:1000]
     root = property(TableModel.getRoot,setRoot)
@@ -164,6 +176,8 @@ class MainWindow(QtGui.QWidget):#MainWindow):
         flatview = TableView.SizeTableView()
         flatview.setModel(self.model2)
         flatview.afterModel()
+        # doesn't work, because model is subtly different
+        # flatview.setSelectionModel(treeview.selectionModel())
         tabwidget.addTab(flatview, "Flat")
         
         #button = QtGui.QPushButton("Reload view")
