@@ -6,6 +6,8 @@ import TableView
 from FileSize import format_size,File
 logger = logging.getLogger("Model")
 
+# TODO actually these models are different views on the data
+
 # Common stuff
 class TableModel(QtCore.QAbstractItemModel):
     def __init__(self, *args):

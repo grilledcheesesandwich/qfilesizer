@@ -59,8 +59,11 @@ class MainWindow(QtGui.QWidget):#MainWindow):
     def build_layout(self):
         vlayout = self.vlayout
 
+        hlayout = QtGui.QHBoxLayout()
+        vlayout.addLayout(hlayout)
+
         tabwidget = QtGui.QTabWidget()
-        vlayout.addWidget(tabwidget)
+        hlayout.addWidget(tabwidget)
 
         # Tree view
         treeview = TableView.SizeTableView()
@@ -74,19 +77,36 @@ class MainWindow(QtGui.QWidget):#MainWindow):
         flatview.afterModel()
         # doesn't work, because model is subtly different
         # flatview.setSelectionModel(treeview.selectionModel())
+        self.selmod1 = treeview.selectionModel()
+        self.connect(self.selmod1, SIGNAL("selectionChanged(const QItemSelection &, const QItemSelection &)"), self.selectionChanged)
+
         tabwidget.addTab(flatview, "Flat")
+
+        buttonbar = QtGui.QHBoxLayout()
+        vlayout.addLayout(buttonbar)
         
         #button = QtGui.QPushButton("Reload view")
         #self.connect(button, SIGNAL("clicked()"), self.reload)
-        #vlayout.addWidget(button)
+        #buttonbar.addWidget(button)
 
         button = QtGui.QPushButton("Load directory")
         self.connect(button, SIGNAL("clicked()"), self.load)
-        vlayout.addWidget(button)
+        buttonbar.addWidget(button)
 
         button = QtGui.QPushButton("Quit")        
         self.connect(button, SIGNAL("clicked()"), self.close)
-        vlayout.addWidget(button)
+        buttonbar.addWidget(button)
+
+        # Statistics
+        grid = QtGui.QVBoxLayout()
+        hlayout.addLayout(grid)
+        grid.addWidget(QtGui.QLabel("Total size:"))
+        self.stats1 = QtGui.QLabel("0")
+        grid.addWidget(self.stats1)
+        grid.addWidget(QtGui.QLabel("Files selected:"))
+        self.stats2 = QtGui.QLabel("0")
+        grid.addWidget(self.stats2)
+        grid.addStretch(1)
 
     def reload(self):
         logger.info("Reloading delegate and view")
@@ -110,3 +130,12 @@ class MainWindow(QtGui.QWidget):#MainWindow):
         self.data = rv
         logger.info("Finished -- models updated")
 
+    def selectionChanged(self, selected, deselected):
+        """Selection changed -- update stats"""
+        rows = [self.model.nodeFromIndex(row) for row in self.selmod1.selectedRows()]
+        self.updateStats(rows)
+
+    def updateStats(self, rows):
+        self.stats1.setText(format_size(sum([x.size for x in rows])))
+        self.stats2.setText(str(len(rows)))
+        
