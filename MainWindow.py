@@ -204,6 +204,8 @@ class MainWindow(QtGui.QWidget):#MainWindow):
 
     def load(self):
         dirname = QtGui.QFileDialog.getExistingDirectory (None, "Select a directory")
+        if not dirname:
+            return # Nothing selected
         logger.info("Load directory %s", dirname)
         dirname = str(dirname)
         from FileSize import recursive_walk
